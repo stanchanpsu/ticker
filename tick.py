@@ -7,6 +7,12 @@ import yfinance as yf
 import signal
 from matplotlib.ticker import StrMethodFormatter
 
+FREQUENCIES = {
+    "1m": 60.0,
+    "2m": 120.0,
+    "5m": 600.0,
+}
+
 
 class GracefulKiller:
     kill_now = False
@@ -20,9 +26,10 @@ class GracefulKiller:
 
 
 class Ticker:
-    def __init__(self, symbol: str, frequency: float = 2.0):
+    def __init__(self, symbol: str, interval="1m"):
         self.symbol = symbol
-        self.frequency = frequency
+        self.interval = interval
+        self.frequency = FREQUENCIES[interval]
 
     def init(self):
         mpl.rcParams['toolbar'] = 'None'
@@ -42,7 +49,7 @@ class Ticker:
         last_day = meta["currentTradingPeriod"]["regular"]
         start = last_day["start"]
         end = last_day["end"]
-        history = ticker.history(start=start, end=end, interval="1m")
+        history = ticker.history(start=start, end=end, interval=self.interval)
         self.current_x = len(history["Close"])
         self.x = list(range(self.current_x))
         self.y = history["Close"].tolist()
