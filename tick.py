@@ -21,8 +21,7 @@ class GracefulKiller:
 
 def init(symbol):
     mpl.rcParams['toolbar'] = 'None'
-    fig, ax = plt.subplots()
-    ax.set_title(symbol)
+    _, ax = plt.subplots(num=symbol)
     ax.yaxis.set_major_formatter(StrMethodFormatter('{x:,.2f}'))
     ax.xaxis.set_ticks([])
 
