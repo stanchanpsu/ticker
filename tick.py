@@ -1,4 +1,5 @@
 import sys
+import matplotlib as mpl
 import matplotlib.pyplot as plt
 import matplotlib.axes as axes
 from datetime import datetime
@@ -19,7 +20,8 @@ class GracefulKiller:
 
 
 def init(symbol):
-    _, ax = plt.subplots()
+    mpl.rcParams['toolbar'] = 'None'
+    fig, ax = plt.subplots()
     ax.set_title(symbol)
     ax.yaxis.set_major_formatter(StrMethodFormatter('{x:,.2f}'))
     ax.xaxis.set_ticks([])
