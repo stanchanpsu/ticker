@@ -7,15 +7,9 @@ import yfinance as yf
 import signal
 from matplotlib.ticker import StrMethodFormatter
 
-FREQUENCIES = {
-    "1m": 60.0,
-    "2m": 120.0,
-    "5m": 600.0,
-}
-
 MARKET_OPEN_HOUR = 9
 MARKET_OPEN_MINUTE = 30
-MARKET_CLOSE_HOUR = 4
+MARKET_CLOSE_HOUR = 16
 
 
 class GracefulKiller:
@@ -33,7 +27,6 @@ class Ticker:
     def __init__(self, symbol: str, interval="1m"):
         self.symbol = symbol
         self.interval = interval
-        self.frequency = FREQUENCIES[interval]
 
     def init(self):
         mpl.rcParams['toolbar'] = 'None'
