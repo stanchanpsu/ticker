@@ -13,6 +13,10 @@ FREQUENCIES = {
     "5m": 600.0,
 }
 
+MARKET_OPEN_HOUR = 9
+MARKET_OPEN_MINUTE = 30
+MARKET_CLOSE_HOUR = 4
+
 
 class GracefulKiller:
     kill_now = False
@@ -34,6 +38,7 @@ class Ticker:
     def init(self):
         mpl.rcParams['toolbar'] = 'None'
         _, ax = plt.subplots(num=self.symbol, facecolor="black")
+        plt.subplots_adjust(left=0.09, right=0.9, top=1.0, bottom=0.0)
         self.axes = ax
         ax.set_facecolor("black")
         ax.spines['bottom'].set_color("white")
@@ -62,7 +67,6 @@ class Ticker:
         self.axes.plot(self.x, self.y)
         return self
 
-    # TODO: only tick if it's a trading day.
     def tick(self):
         killer = GracefulKiller()
 
@@ -70,11 +74,13 @@ class Ticker:
         while not killer.kill_now:
             now = datetime.now()
             # If the trading day is over, just listen for GUI events.
-            if now.hour >= 4:
+            if (now.hour >= MARKET_CLOSE_HOUR or
+                now.hour < MARKET_OPEN_HOUR or
+                    (now.hour == MARKET_OPEN_HOUR and now.minute < MARKET_OPEN_MINUTE)):
                 plt.pause(5.0)
                 continue
             # If the trading day is just starting, clear the previous chart.
-            if now.hour == 9 and now.minute < 30:
+            if now.hour == MARKET_OPEN_HOUR and now.minute == MARKET_OPEN_MINUTE:
                 self.x.clear()
                 self.y.clear()
                 self.current_x = 0
@@ -92,7 +98,7 @@ class Ticker:
                 last_annotation.remove()
             last_annotation = self.axes.annotate(price_string, (1, y), xytext=(6, 0),
                                                  xycoords=self.axes.get_yaxis_transform(),
-                                                 textcoords='offset points', color=color)
+                                                 textcoords='offset points', color=color, fontsize=12)
             plt.pause(5.0)
             self.current_x += 1
         self._cleanup()
