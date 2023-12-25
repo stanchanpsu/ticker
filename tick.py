@@ -33,14 +33,18 @@ class Ticker:
 
     def init(self):
         mpl.rcParams['toolbar'] = 'None'
-        _, ax = plt.subplots(num=self.symbol)
+        _, ax = plt.subplots(num=self.symbol, facecolor="black")
         self.axes = ax
+        ax.set_facecolor("black")
+        ax.spines['bottom'].set_color("white")
+        ax.spines['left'].set_color("white")
+        ax.tick_params(axis="y", colors="white")
         ax.yaxis.set_major_formatter(StrMethodFormatter('{x:,.2f}'))
         ax.xaxis.set_ticks([])
 
         ticker = yf.Ticker(self.symbol)
         open = ticker.info['open']
-        ax.axhline(y=open, color='grey', linestyle=':')
+        ax.axhline(y=open, color='white', linestyle=':')
         return self
 
     def backfill(self):
@@ -49,6 +53,8 @@ class Ticker:
         last_day = meta["currentTradingPeriod"]["regular"]
         start = last_day["start"]
         end = last_day["end"]
+        self.start = datetime.fromtimestamp(start)
+        self.end = datetime.fromtimestamp(end)
         history = ticker.history(start=start, end=end, interval=self.interval)
         self.current_x = len(history["Close"])
         self.x = list(range(self.current_x))
@@ -62,6 +68,17 @@ class Ticker:
 
         last_annotation = None
         while not killer.kill_now:
+            now = datetime.now()
+            # If the trading day is over, just listen for GUI events.
+            if now.hour >= 4:
+                plt.pause(5.0)
+                continue
+            # If the trading day is just starting, clear the previous chart.
+            if now.hour == 9 and now.minute < 30:
+                self.x.clear()
+                self.y.clear()
+                self.current_x = 0
+            # Trading day:
             self.x.append(self.current_x)
             ticker = yf.Ticker(self.symbol)
             price = ticker.info['currentPrice']
@@ -73,10 +90,10 @@ class Ticker:
             self.axes.plot(self.x, self.y, c=color)
             if last_annotation is not None:
                 last_annotation.remove()
-            last_annotation = self.axes.annotate(price_string, (self.current_x, y),
-                                                 xytext=(-30, 15),
+            last_annotation = self.axes.annotate(price_string, (1, y), xytext=(6, 0),
+                                                 xycoords=self.axes.get_yaxis_transform(),
                                                  textcoords='offset points', color=color)
-            plt.pause(self.frequency)
+            plt.pause(5.0)
             self.current_x += 1
         self._cleanup()
 
