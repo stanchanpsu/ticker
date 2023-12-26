@@ -256,7 +256,7 @@
             "gmtoffset": -18000
         }
     },
-    "tradingPeriods": "pre_start""dataframe",
+    "tradingPeriods": "dataframe",
     "dataGranularity": "1h",
     "range": "1wk",
     "validRanges": [
