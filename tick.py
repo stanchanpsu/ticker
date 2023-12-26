@@ -39,7 +39,10 @@ class Ticker:
         ax.tick_params(axis="y", colors="white")
         ax.yaxis.set_major_formatter(StrMethodFormatter('{x:,.2f}'))
         ax.xaxis.set_ticks([])
-
+        plt.cla()
+        self.x = []
+        self.y = []
+        self.current_x = 0
         ticker = yf.Ticker(self.symbol)
         open = ticker.info['open']
         ax.axhline(y=open, color='white', linestyle=':')
@@ -74,9 +77,8 @@ class Ticker:
                 continue
             # If the trading day is just starting, clear the previous chart.
             if now.hour == MARKET_OPEN_HOUR and now.minute == MARKET_OPEN_MINUTE:
-                self.x.clear()
-                self.y.clear()
-                self.current_x = 0
+                self.init()
+
             # Trading day:
             self.x.append(self.current_x)
             ticker = yf.Ticker(self.symbol)
