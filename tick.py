@@ -39,13 +39,8 @@ class Ticker:
         ax.tick_params(axis="y", colors="white")
         ax.yaxis.set_major_formatter(StrMethodFormatter('{x:,.2f}'))
         ax.xaxis.set_ticks([])
-        plt.cla()
-        self.x = []
-        self.y = []
-        self.current_x = 0
-        ticker = yf.Ticker(self.symbol)
-        open = ticker.info['open']
-        ax.axhline(y=open, color='white', linestyle=':')
+
+        self._start_day()
         return self
 
     def backfill(self):
@@ -63,6 +58,16 @@ class Ticker:
         self.axes.plot(self.x, self.y)
         return self
 
+    def _start_day(self):
+        self.x = []
+        self.y = []
+        self.current_x = 0
+        plt.cla()
+
+        ticker = yf.Ticker(self.symbol)
+        open = ticker.info['open']
+        self.axes.axhline(y=open, color='white', linestyle=':')
+
     def tick(self):
         killer = GracefulKiller()
 
@@ -77,7 +82,7 @@ class Ticker:
                 continue
             # If the trading day is just starting, clear the previous chart.
             if now.hour == MARKET_OPEN_HOUR and now.minute == MARKET_OPEN_MINUTE:
-                self.init()
+                self._start_day()
 
             # Trading day:
             self.x.append(self.current_x)
