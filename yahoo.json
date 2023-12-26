@@ -220,3 +220,56 @@
     "financialCurrency": "USD",
     "trailingPegRatio": "None"
 }
+
+{
+    "currency": "USD",
+    "symbol": "SNAP",
+    "exchangeName": "NYQ",
+    "instrumentType": "EQUITY",
+    "firstTradeDate": 1488465000,
+    "regularMarketTime": 1703602238,
+    "gmtoffset": -18000,
+    "timezone": "EST",
+    "exchangeTimezoneName": "America/New_York",
+    "regularMarketPrice": 16.85,
+    "chartPreviousClose": 17.18,
+    "previousClose": 17.05,
+    "scale": 3,
+    "priceHint": 2,
+    "currentTradingPeriod": {
+        "pre": {
+            "timezone": "EST",
+            "start": 1703581200,
+            "end": 1703601000,
+            "gmtoffset": -18000
+        },
+        "regular": {
+            "timezone": "EST",
+            "start": 1703601000,
+            "end": 1703624400,
+            "gmtoffset": -18000
+        },
+        "post": {
+            "timezone": "EST",
+            "start": 1703624400,
+            "end": 1703638800,
+            "gmtoffset": -18000
+        }
+    },
+    "tradingPeriods": "pre_start""dataframe",
+    "dataGranularity": "1h",
+    "range": "1wk",
+    "validRanges": [
+        "1d",
+        "5d",
+        "1mo",
+        "3mo",
+        "6mo",
+        "1y",
+        "2y",
+        "5y",
+        "10y",
+        "ytd",
+        "max"
+    ]
+}
