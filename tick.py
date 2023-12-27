@@ -65,8 +65,8 @@ class Ticker:
         plt.cla()
 
         ticker = yf.Ticker(self.symbol)
-        open = ticker.info['open']
-        self.axes.axhline(y=open, color='white', linestyle=':')
+        self.open = ticker.info['currentPrice']
+        self.axes.axhline(y=self.open, color='white', linestyle=':')
 
     def tick(self):
         killer = GracefulKiller()
@@ -91,8 +91,7 @@ class Ticker:
             price_string = f'{price:,.2f}'
             y = float(price_string)
             self.y.append(y)
-            open = ticker.info['open']
-            color = 'green' if price >= open else 'red'
+            color = 'green' if price >= self.open else 'red'
             self.axes.plot(self.x, self.y, c=color)
             if last_annotation is not None:
                 last_annotation.remove()
