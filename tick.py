@@ -1,15 +1,14 @@
+import signal
 import sys
 import matplotlib as mpl
 import matplotlib.pyplot as plt
-import matplotlib.axes as axes
+from matplotlib.ticker import StrMethodFormatter
 from datetime import datetime
 import yfinance as yf
-import signal
-from matplotlib.ticker import StrMethodFormatter
+
 
 MARKET_OPEN_HOUR = 9
 MARKET_OPEN_MINUTE = 30
-MARKET_CLOSE_HOUR = 16
 
 
 class GracefulKiller:
@@ -24,9 +23,8 @@ class GracefulKiller:
 
 
 class Ticker:
-    def __init__(self, symbol: str, interval="1m"):
+    def __init__(self, symbol: str):
         self.symbol = symbol
-        self.interval = interval
 
     def init(self):
         mpl.rcParams['toolbar'] = 'None'
@@ -43,28 +41,15 @@ class Ticker:
         self._start_day()
         return self
 
-    def backfill(self):
-        ticker = yf.Ticker(self.symbol)
-        meta = ticker.history_metadata
-        last_day = meta["currentTradingPeriod"]["regular"]
-        start = last_day["start"]
-        end = last_day["end"]
-        self.start = datetime.fromtimestamp(start)
-        self.end = datetime.fromtimestamp(end)
-        history = ticker.history(start=start, end=end, interval=self.interval)
-        self.current_x = len(history["Close"])
-        self.x = list(range(self.current_x))
-        self.y = history["Close"].tolist()
-        self.axes.plot(self.x, self.y)
-        return self
-
     def _start_day(self):
         self.x = []
         self.y = []
         self.current_x = 0
         plt.cla()
 
+        # Open price (will be wrong if this program is started after the trading day's start)
         ticker = yf.Ticker(self.symbol)
+        # Don't use 'open' because there's a lag in the data given by the API.
         self.open = ticker.info['currentPrice']
         self.axes.axhline(y=self.open, color='white', linestyle=':')
 
@@ -74,19 +59,24 @@ class Ticker:
         last_annotation = None
         while not killer.kill_now:
             now = datetime.now()
-            # If the trading day is over, just listen for GUI events.
-            if (now.hour >= MARKET_CLOSE_HOUR or
-                now.hour < MARKET_OPEN_HOUR or
-                    (now.hour == MARKET_OPEN_HOUR and now.minute < MARKET_OPEN_MINUTE)):
+
+            ticker = yf.Ticker(self.symbol)
+            meta = ticker.history_metadata
+            last_day = meta["currentTradingPeriod"]["regular"]
+            start = datetime.fromtimestamp(last_day["start"])
+            end = datetime.fromtimestamp(last_day["end"])
+
+            # If we're not in a trading day, just listen for GUI events (to be able to close the window).
+            if (now < start or now > end):
                 plt.pause(5.0)
                 continue
+
             # If the trading day is just starting, clear the previous chart.
             if now.hour == MARKET_OPEN_HOUR and now.minute == MARKET_OPEN_MINUTE:
                 self._start_day()
 
             # Trading day:
             self.x.append(self.current_x)
-            ticker = yf.Ticker(self.symbol)
             price = ticker.info['currentPrice']
             price_string = f'{price:,.2f}'
             y = float(price_string)
@@ -112,4 +102,4 @@ if __name__ == '__main__':
     if len(sys.argv) > 1:
         stock_symbol = sys.argv[1]
 
-    Ticker(symbol=stock_symbol).init().backfill().tick()
+    Ticker(symbol=stock_symbol).init().tick()
