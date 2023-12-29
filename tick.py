@@ -9,6 +9,7 @@ import yfinance as yf
 
 MARKET_OPEN_HOUR = 9
 MARKET_OPEN_MINUTE = 30
+MARKET_OPEN_SECOND = 15
 
 
 class GracefulKiller:
@@ -26,7 +27,6 @@ class Ticker:
     def __init__(self, symbol: str):
         self.symbol = symbol
 
-    def init(self):
         mpl.rcParams['toolbar'] = 'None'
         _, ax = plt.subplots(num=self.symbol, facecolor="black")
         plt.subplots_adjust(left=0.09, right=0.9, top=1.0, bottom=0.0)
@@ -39,7 +39,6 @@ class Ticker:
         ax.xaxis.set_ticks([])
 
         self._start_day()
-        return self
 
     def _start_day(self):
         self.x = []
@@ -72,7 +71,7 @@ class Ticker:
                 continue
 
             # If the trading day is just starting, clear the previous chart.
-            if now.hour == MARKET_OPEN_HOUR and now.minute == MARKET_OPEN_MINUTE:
+            if now.hour == MARKET_OPEN_HOUR and now.minute == MARKET_OPEN_MINUTE and now.second < MARKET_OPEN_SECOND:
                 self._start_day()
 
             # Trading day:
@@ -102,4 +101,5 @@ if __name__ == '__main__':
     if len(sys.argv) > 1:
         stock_symbol = sys.argv[1]
 
-    Ticker(symbol=stock_symbol).init().tick()
+    t = Ticker(symbol=stock_symbol)
+    t.tick()
