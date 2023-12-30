@@ -1,11 +1,11 @@
 import signal
 import sys
+from datetime import datetime
+
 import matplotlib as mpl
 import matplotlib.pyplot as plt
-from matplotlib.ticker import StrMethodFormatter
-from datetime import datetime
 import yfinance as yf
-
+from matplotlib.ticker import StrMethodFormatter
 
 MARKET_OPEN_HOUR = 9
 MARKET_OPEN_MINUTE = 30
