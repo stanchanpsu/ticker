@@ -57,38 +57,42 @@ class Ticker:
 
         last_annotation = None
         while not killer.kill_now:
-            now = datetime.now()
+            try:
+                now = datetime.now()
 
-            ticker = yf.Ticker(self.symbol)
-            meta = ticker.history_metadata
-            last_day = meta["currentTradingPeriod"]["regular"]
-            start = datetime.fromtimestamp(last_day["start"])
-            end = datetime.fromtimestamp(last_day["end"])
+                ticker = yf.Ticker(self.symbol)
+                meta = ticker.history_metadata
+                last_day = meta["currentTradingPeriod"]["regular"]
+                start = datetime.fromtimestamp(last_day["start"])
+                end = datetime.fromtimestamp(last_day["end"])
 
-            # If we're not in a trading day, just listen for GUI events (to be able to close the window).
-            if (now < start or now > end):
+                # If we're not in a trading day, just listen for GUI events (to be able to close the window).
+                if (now < start or now > end):
+                    plt.pause(5.0)
+                    continue
+
+                # If the trading day is just starting, clear the previous chart.
+                if now.hour == MARKET_OPEN_HOUR and now.minute == MARKET_OPEN_MINUTE and now.second < MARKET_OPEN_SECOND:
+                    self._start_day()
+
+                # Trading day:
+                self.x.append(self.current_x)
+                price = ticker.info['currentPrice']
+                price_string = f'{price:,.2f}'
+                y = float(price_string)
+                self.y.append(y)
+                color = 'green' if price >= self.open else 'red'
+                self.axes.plot(self.x, self.y, c=color)
+                if last_annotation is not None:
+                    last_annotation.remove()
+                last_annotation = self.axes.annotate(price_string, (1, y), xytext=(6, 0),
+                                                     xycoords=self.axes.get_yaxis_transform(),
+                                                     textcoords='offset points', color=color, fontsize=12)
                 plt.pause(5.0)
-                continue
-
-            # If the trading day is just starting, clear the previous chart.
-            if now.hour == MARKET_OPEN_HOUR and now.minute == MARKET_OPEN_MINUTE and now.second < MARKET_OPEN_SECOND:
-                self._start_day()
-
-            # Trading day:
-            self.x.append(self.current_x)
-            price = ticker.info['currentPrice']
-            price_string = f'{price:,.2f}'
-            y = float(price_string)
-            self.y.append(y)
-            color = 'green' if price >= self.open else 'red'
-            self.axes.plot(self.x, self.y, c=color)
-            if last_annotation is not None:
-                last_annotation.remove()
-            last_annotation = self.axes.annotate(price_string, (1, y), xytext=(6, 0),
-                                                 xycoords=self.axes.get_yaxis_transform(),
-                                                 textcoords='offset points', color=color, fontsize=12)
-            plt.pause(5.0)
-            self.current_x += 1
+                self.current_x += 1
+            except Exception as e:
+                print(f'[{now:%Y-%m-%d %H:%M:%S}]', e)
+                pass
         self._cleanup()
 
     def _cleanup(self):
