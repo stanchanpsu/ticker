@@ -28,8 +28,10 @@ class Ticker:
         self.symbol = symbol
 
         mpl.rcParams['toolbar'] = 'None'
-        _, ax = plt.subplots(num=self.symbol, facecolor="black")
+        _, ax = plt.subplots(
+            num=self.symbol, facecolor="black")
         plt.subplots_adjust(left=0.09, right=0.9, top=1.0, bottom=0.0)
+        plt.get_current_fig_manager().full_screen_toggle()
         self.axes = ax
         ax.set_facecolor("black")
         ax.spines['bottom'].set_color("white")
